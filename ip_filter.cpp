@@ -3,6 +3,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
+
+#include <fstream>
+#include <iterator>
+#include <sstream>
+
+using Ip = std::vector<int>;
+using IpPool = std::vector<Ip>;
 
 // ("",  '.') -> [""]
 // ("11", '.') -> ["11"]
@@ -18,7 +26,8 @@ std::vector<std::string> split(const std::string &str, char d)
     std::string::size_type stop = str.find_first_of(d);
     while(stop != std::string::npos)
     {
-        r.push_back(str.substr(start, stop - start));
+        auto&& result = str.substr(start, stop - start);
+        r.push_back(result);
 
         start = stop + 1;
         stop = str.find_first_of(d, start);
@@ -29,32 +38,102 @@ std::vector<std::string> split(const std::string &str, char d)
     return r;
 }
 
+template<class T>
+IpPool filterInternal(const IpPool& pool, int index, T first)
+{
+    IpPool result;
+    std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&, index](const auto& item)
+    {
+        return item[index] == first;
+    });
+    return result;
+}
+
+template<class T, class... Types>
+IpPool filterInternal(const IpPool& pool, int index, T first, Types... args)
+{
+    IpPool result;
+    std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&, index](const auto& item)
+    {
+        return item[index] == first;
+    });
+    return filterInternal(result, index + 1, args...);
+}
+
+/*
+ *
+ template<class T, class... Types>
+IpPool filterInternal(const IpPool& pool, int index, T first, Types... args)
+{
+    IpPool result;
+    std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&, index](const auto& item)
+{
+return item[index] == first;
+});
+auto&& internalResult = filterInternal(pool, index + 1, args...);
+result.insert(result.end(), internalResult.begin(), internalResult.end());
+return result;
+}
+ */
+
+template<class... Types>
+void filter(const IpPool& pool, Types... args)
+{
+    for(const auto& ip : filterInternal(pool, 0, args...))
+    {
+        bool isFirst = true;
+        for(const auto& ip_part : ip)
+        {
+            if (!isFirst)
+            {
+                std::cout << ".";
+            }
+            std::cout << ip_part ;
+            isFirst = false;
+        }
+        std::cout << std::endl;
+    }
+}
+
+
 int main(int argc, char const *argv[])
 {
     try
     {
-        std::vector<std::vector<std::string>> ip_pool;
+        std::istream* input = &std::cin; // input is stdin by default
+        input = new std::ifstream("../ip_filter.tsv");
 
-        for(std::string line; std::getline(std::cin, line);)
+        IpPool ip_pool;
+
+        for(std::string line; std::getline(*input, line);)
         {
             std::vector<std::string> v = split(line, '\t');
-            ip_pool.push_back(split(v.at(0), '.'));
+            Ip ip;
+            for(auto rawIpPart : split(v.at(0), '.'))
+            {
+                ip.push_back(std::stoi(rawIpPart));
+            }
+            ip_pool.push_back(ip);
         }
 
-        // TODO reverse lexicographically sort
+        std::sort(ip_pool.begin(), ip_pool.end(), std::greater<Ip>());
 
-        for(std::vector<std::vector<std::string> >::const_iterator ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
+        for(const auto& ip : ip_pool)
         {
-            for(std::vector<std::string>::const_iterator ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part)
-            {
-                if (ip_part != ip->cbegin())
-                {
-                    std::cout << ".";
-
-                }
-                std::cout << *ip_part;
-            }
-            std::cout << std::endl;
+//            bool isFirst = true;
+//            for(const auto& ip_part : ip)
+//            {
+//                if (!isFirst)
+//                {
+//                    std::cout << ".";
+//                }
+//                std::cout << ip_part ;
+//                isFirst = false;
+//            }
+            std::stringstream output;
+            std::copy(ip.begin(), std::prev(ip.end()),std::ostream_iterator<int>(output, "."));
+            output << ip.back();
+            std::cout << output.str() << std::endl;
         }
 
         // 222.173.235.246
@@ -65,7 +144,7 @@ int main(int argc, char const *argv[])
         // 1.29.168.152
         // 1.1.234.8
 
-        // TODO filter by first byte and output
+        filter(ip_pool, 1);
         // ip = filter(1)
 
         // 1.231.69.33
@@ -75,6 +154,7 @@ int main(int argc, char const *argv[])
         // 1.1.234.8
 
         // TODO filter by first and second bytes and output
+        filter(ip_pool, 46, 70);
         // ip = filter(46, 70)
 
         // 46.70.225.39
@@ -119,6 +199,8 @@ int main(int argc, char const *argv[])
         // 46.49.43.85
         // 39.46.86.85
         // 5.189.203.46
+
+        delete input;
     }
     catch(const std::exception &e)
     {
