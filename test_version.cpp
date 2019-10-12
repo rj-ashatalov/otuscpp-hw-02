@@ -12,7 +12,8 @@ BOOST_AUTO_TEST_CASE(test_version)
 
 BOOST_AUTO_TEST_CASE(ip_filter)
 {
-//    BOOST_CHECK(version() > 0);
+    //todo tests
+    BOOST_CHECK(false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
