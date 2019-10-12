@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-
 #include <fstream>
 #include <iterator>
 #include <sstream>
@@ -50,7 +49,7 @@ void print(const IpPool& pool)
 }
 
 template<class T, class... Types>
-IpPool filterInternal(const IpPool& pool, T first, Types... args)
+void filter(const IpPool& pool, T first, Types... args)
 {
     std::vector<T> filterList{first, args...};
     IpPool result;
@@ -58,11 +57,11 @@ IpPool filterInternal(const IpPool& pool, T first, Types... args)
     {
         return std::equal(filterList.begin(), filterList.end(), ip.begin());
     });
-    return result;
+    print(result);
 }
 
 template<class T, class... Types>
-IpPool filterInternalAny(const IpPool& pool, T first, Types... args)
+void filter_any(const IpPool& pool, T first, Types... args)
 {
     std::vector<T> filterList{first, args...};
     IpPool result;
@@ -73,34 +72,21 @@ IpPool filterInternalAny(const IpPool& pool, T first, Types... args)
             return std::find(ip.begin(), ip.end(), filterKey) != ip.end();
         });
     });
-    return result;
-}
-
-
-template<class... Types>
-void filter_any(const IpPool& pool, Types... args)
-{
-    print(filterInternalAny(pool, args...));
-}
-
-template<class... Types>
-void filter(const IpPool& pool, Types... args)
-{
-    print(filterInternal(pool, 0, args...));
+    print(result);
 }
 
 int main(int argc, char const *argv[])
 {
-    std::istream* input = &std::cin; // input is stdin by default
+    std::istream* input = &std::cin;
     if (argc > 1)
     {
-        input = new std::ifstream(argv[1]);
+        auto inputDataPath = argv[1];
+        input = new std::ifstream(inputDataPath);
     }
 
     try
     {
         IpPool ip_pool;
-
         for(std::string line; std::getline(*input, line);)
         {
             std::vector<std::string> v = split(line, '\t');
@@ -116,68 +102,9 @@ int main(int argc, char const *argv[])
 
         print(ip_pool);
 
-        // 222.173.235.246
-        // 222.130.177.64
-        // 222.82.198.61
-        // ...
-        // 1.70.44.170
-        // 1.29.168.152
-        // 1.1.234.8
-
         filter(ip_pool, 1);
-        // ip = filter(1)
-
-        // 1.231.69.33
-        // 1.87.203.225
-        // 1.70.44.170
-        // 1.29.168.152
-        // 1.1.234.8
-
         filter(ip_pool, 46, 70);
-        // ip = filter(46, 70)
-
-        // 46.70.225.39
-        // 46.70.147.26
-        // 46.70.113.73
-        // 46.70.29.76
-
         filter_any(ip_pool, 46);
-        // ip = filter_any(46)
-
-        // 186.204.34.46
-        // 186.46.222.194
-        // 185.46.87.231
-        // 185.46.86.132
-        // 185.46.86.131
-        // 185.46.86.131
-        // 185.46.86.22
-        // 185.46.85.204
-        // 185.46.85.78
-        // 68.46.218.208
-        // 46.251.197.23
-        // 46.223.254.56
-        // 46.223.254.56
-        // 46.182.19.219
-        // 46.161.63.66
-        // 46.161.61.51
-        // 46.161.60.92
-        // 46.161.60.35
-        // 46.161.58.202
-        // 46.161.56.241
-        // 46.161.56.203
-        // 46.161.56.174
-        // 46.161.56.106
-        // 46.161.56.106
-        // 46.101.163.119
-        // 46.101.127.145
-        // 46.70.225.39
-        // 46.70.147.26
-        // 46.70.113.73
-        // 46.70.29.76
-        // 46.55.46.98
-        // 46.49.43.85
-        // 39.46.86.85
-        // 5.189.203.46
     }
     catch(const std::exception &e)
     {
