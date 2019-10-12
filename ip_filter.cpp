@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iterator>
 #include <sstream>
+#include <functional>
 
 using Ip = std::vector<int>;
 using IpPool = std::vector<Ip>;
@@ -38,71 +39,67 @@ std::vector<std::string> split(const std::string &str, char d)
     return r;
 }
 
-template<class T>
-IpPool filterInternal(const IpPool& pool, int index, T first)
+void print(const IpPool& pool)
 {
-    IpPool result;
-    std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&, index](const auto& item)
+    for(const auto& ip : pool)
     {
-        return item[index] == first;
+        std::stringstream output;
+        std::copy(ip.begin(), std::prev(ip.end()),std::ostream_iterator<int>(output, "."));
+        output << ip.back();
+        std::cout << output.str() << std::endl;
+    }
+}
+
+template<class T, class... Types>
+IpPool filterInternal(const IpPool& pool, T first, Types... args)
+{
+    std::vector<T> filterList{first, args...};
+    IpPool result;
+    std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&](const auto& ip)
+    {
+        return std::equal(filterList.begin(), filterList.end(), ip.begin());
     });
     return result;
 }
 
 template<class T, class... Types>
-IpPool filterInternal(const IpPool& pool, int index, T first, Types... args)
+IpPool filterInternalAny(const IpPool& pool, T first, Types... args)
 {
+    std::vector<T> filterList{first, args...};
     IpPool result;
-    std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&, index](const auto& item)
+    std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&](const auto& ip)
     {
-        return item[index] == first;
+        return std::any_of(filterList.begin(), filterList.end(), [&](const auto& filterKey)
+        {
+            return std::find(ip.begin(), ip.end(), filterKey) != ip.end();
+        });
     });
-    return filterInternal(result, index + 1, args...);
+    return result;
 }
 
-/*
- *
- template<class T, class... Types>
-IpPool filterInternal(const IpPool& pool, int index, T first, Types... args)
+
+template<class... Types>
+void filter_any(const IpPool& pool, Types... args)
 {
-    IpPool result;
-    std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&, index](const auto& item)
-{
-return item[index] == first;
-});
-auto&& internalResult = filterInternal(pool, index + 1, args...);
-result.insert(result.end(), internalResult.begin(), internalResult.end());
-return result;
+    print(filterInternalAny(pool, args...));
 }
- */
 
 template<class... Types>
 void filter(const IpPool& pool, Types... args)
 {
-    for(const auto& ip : filterInternal(pool, 0, args...))
-    {
-        bool isFirst = true;
-        for(const auto& ip_part : ip)
-        {
-            if (!isFirst)
-            {
-                std::cout << ".";
-            }
-            std::cout << ip_part ;
-            isFirst = false;
-        }
-        std::cout << std::endl;
-    }
+    print(filterInternal(pool, 0, args...));
 }
-
 
 int main(int argc, char const *argv[])
 {
+    std::istream* input = &std::cin; // input is stdin by default
+    if (argc > 1)
+    {
+        input = new std::ifstream(argv[1]);
+    }
+
     try
     {
-        std::istream* input = &std::cin; // input is stdin by default
-        input = new std::ifstream("../ip_filter.tsv");
-
         IpPool ip_pool;
 
         for(std::string line; std::getline(*input, line);)
@@ -118,23 +115,7 @@ int main(int argc, char const *argv[])
 
         std::sort(ip_pool.begin(), ip_pool.end(), std::greater<Ip>());
 
-        for(const auto& ip : ip_pool)
-        {
-//            bool isFirst = true;
-//            for(const auto& ip_part : ip)
-//            {
-//                if (!isFirst)
-//                {
-//                    std::cout << ".";
-//                }
-//                std::cout << ip_part ;
-//                isFirst = false;
-//            }
-            std::stringstream output;
-            std::copy(ip.begin(), std::prev(ip.end()),std::ostream_iterator<int>(output, "."));
-            output << ip.back();
-            std::cout << output.str() << std::endl;
-        }
+        print(ip_pool);
 
         // 222.173.235.246
         // 222.130.177.64
@@ -153,7 +134,6 @@ int main(int argc, char const *argv[])
         // 1.29.168.152
         // 1.1.234.8
 
-        // TODO filter by first and second bytes and output
         filter(ip_pool, 46, 70);
         // ip = filter(46, 70)
 
@@ -162,7 +142,7 @@ int main(int argc, char const *argv[])
         // 46.70.113.73
         // 46.70.29.76
 
-        // TODO filter by any byte and output
+        filter_any(ip_pool, 46);
         // ip = filter_any(46)
 
         // 186.204.34.46
@@ -199,13 +179,15 @@ int main(int argc, char const *argv[])
         // 46.49.43.85
         // 39.46.86.85
         // 5.189.203.46
-
-        delete input;
     }
     catch(const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
     }
 
+    if (argc > 1)
+    {
+        delete input;
+    }
     return 0;
 }
