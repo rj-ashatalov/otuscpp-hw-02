@@ -8,7 +8,6 @@
 #include <fstream>
 #include <iterator>
 #include <sstream>
-#include <functional>
 
 using Ip = std::vector<int>;
 using IpPool = std::vector<Ip>;
