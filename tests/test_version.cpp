@@ -13,8 +13,19 @@ BOOST_AUTO_TEST_CASE(test_version)
 
 BOOST_AUTO_TEST_CASE(ip_filter)
 {
-    //todo tests
-   BOOST_CHECK(false);
+    std::ifstream input{"../ip_filter.tsv"};
+
+    auto ipPool = fill(&input);
+    std::sort(ipPool.begin(), ipPool.end(), std::greater<Ip>());
+
+    std::stringstream output;
+    output << toString(ipPool);
+    output << toString(filter(ipPool, 1));
+    output << toString(filter(ipPool, 46, 70));
+    output << toString(filter_any(ipPool, 46));
+
+    std::ifstream testStream{ "../ip_filter.tst"};
+    BOOST_CHECK(output.str() == toString(fill(&testStream)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
