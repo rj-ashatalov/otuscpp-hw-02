@@ -39,15 +39,31 @@ std::vector<std::string> split(const std::string &str, char d)
     return r;
 }
 
-void print(const IpPool& pool)
+IpPool fill(std::istream* input)
 {
+    IpPool ipPool;
+    for(std::string line; std::getline(*input, line);)
+    {
+        std::vector<std::string> v = split(line, '\t');
+        Ip ip;
+        for(auto rawIpPart : split(v.at(0), '.'))
+        {
+            ip.push_back(std::stoi(rawIpPart));
+        }
+        ipPool.push_back(ip);
+    }
+    return ipPool;
+}
+
+std::string toString(const IpPool& pool)
+{
+    std::stringstream output;
     for(const auto& ip : pool)
     {
-        std::stringstream output;
         std::copy(ip.begin(), std::prev(ip.end()),std::ostream_iterator<int>(output, "."));
-        output << ip.back();
-        std::cout << output.str() << std::endl;
+        output << ip.back() << std::endl;
     }
+    return output.str();
 }
 
 template<class T, class... Types>

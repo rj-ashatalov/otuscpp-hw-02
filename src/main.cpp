@@ -11,24 +11,13 @@ int main(int argc, char const *argv[])
 
     try
     {
-        IpPool ipPool;
-        for(std::string line; std::getline(*input, line);)
-        {
-            std::vector<std::string> v = split(line, '\t');
-            Ip ip;
-            for(auto rawIpPart : split(v.at(0), '.'))
-            {
-                ip.push_back(std::stoi(rawIpPart));
-            }
-            ipPool.push_back(ip);
-        }
-
+        auto ipPool = fill(input);
         std::sort(ipPool.begin(), ipPool.end(), std::greater<Ip>());
 
-        print(ipPool);
-        print(filter(ipPool, 1));
-        print(filter(ipPool, 46, 70));
-        print(filter_any(ipPool, 46));
+        std::cout << toString(ipPool);
+        std::cout << toString(filter(ipPool, 1));
+        std::cout << toString(filter(ipPool, 46, 70));
+        std::cout << toString(filter_any(ipPool, 46));
     }
     catch(const std::exception &e)
     {
