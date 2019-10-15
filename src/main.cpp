@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
 
     try
     {
-        IpPool ip_pool;
+        IpPool ipPool;
         for(std::string line; std::getline(*input, line);)
         {
             std::vector<std::string> v = split(line, '\t');
@@ -20,16 +20,15 @@ int main(int argc, char const *argv[])
             {
                 ip.push_back(std::stoi(rawIpPart));
             }
-            ip_pool.push_back(ip);
+            ipPool.push_back(ip);
         }
 
-        std::sort(ip_pool.begin(), ip_pool.end(), std::greater<Ip>());
+        std::sort(ipPool.begin(), ipPool.end(), std::greater<Ip>());
 
-        print(ip_pool);
-
-        print(filter(ip_pool, 1));
-        print(filter(ip_pool, 46, 70));
-        print(filter_any(ip_pool, 46));
+        print(ipPool);
+        print(filter(ipPool, 1));
+        print(filter(ipPool, 46, 70));
+        print(filter_any(ipPool, 46));
     }
     catch(const std::exception &e)
     {

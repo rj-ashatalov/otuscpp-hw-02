@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.2)
 
 function(add_executable_from_dir TARGET SRC_DIR)
     file(GLOB_RECURSE TARGET_SRC "${SRC_DIR}/*.cpp" "${SRC_DIR}/*.h")
-    message(${TARGET_SRC})
     add_executable(${TARGET} ${TARGET_SRC})
 endfunction()
 
