@@ -66,16 +66,46 @@ std::string toString(const IpPool& pool)
     return output.str();
 }
 
-template<class T, class... Types>
-IpPool filter(const IpPool& pool, T first, Types... args)
+template<class T>
+IpPool filterInternal(const IpPool& pool, size_t index, T first)
 {
-    std::vector<T> filterList{first, args...};
     IpPool result;
-    std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&](const auto& ip)
+    if (pool.size() <= 0 || index >= pool.begin()->size())
     {
-        return std::equal(filterList.begin(), filterList.end(), ip.begin());
+        return result;
+    }
+
+    auto iterFilterFirst = std::find_if(pool.begin(), pool.end(), [&](const auto& ip)
+    {
+        return ip[index] == first;
     });
+
+    auto iterFilterLast = std::find_if(iterFilterFirst, pool.end(), [&](const auto& ip)
+    {
+        return ip[index] < first;
+    });
+
+    std::copy(iterFilterFirst, iterFilterLast, std::back_inserter(result));
     return result;
+}
+
+template<class T, class... Types>
+IpPool filterInternal(const IpPool& pool, size_t index, T first, Types... args)
+{
+    IpPool result;
+    if (pool.size() <= 0)
+    {
+        return result;
+    }
+
+    result = filterInternal(pool, index, first);
+    return filterInternal(result, index + 1, args...);
+}
+
+template<class... Types>
+IpPool filter(const IpPool& pool, Types... args)
+{
+    return filterInternal(pool, 0, args...);
 }
 
 template<class T, class... Types>
@@ -85,10 +115,7 @@ IpPool filter_any(const IpPool& pool, T first, Types... args)
     IpPool result;
     std::copy_if(pool.begin(), pool.end(), std::back_inserter(result), [&](const auto& ip)
     {
-        return std::any_of(filterList.begin(), filterList.end(), [&](const auto& filterKey)
-        {
-            return std::find(ip.begin(), ip.end(), filterKey) != ip.end();
-        });
+        return std::find_first_of(ip.begin(), ip.end(), filterList.begin(), filterList.end()) != ip.end();
     });
     return result;
 }
