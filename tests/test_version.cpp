@@ -11,6 +11,11 @@ BOOST_AUTO_TEST_CASE(test_version)
     BOOST_CHECK(version() > 0);
 }
 
+    BOOST_AUTO_TEST_CASE(test_fail)
+    {
+        BOOST_CHECK_MESSAGE(false, "Test fail message");
+    }
+
 BOOST_AUTO_TEST_CASE(ip_filter_full_test)
 {
     std::ifstream input{"../ip_filter.tsv"};
