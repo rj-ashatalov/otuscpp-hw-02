@@ -69,12 +69,6 @@ std::string toString(const IpPool& pool)
 template<class T>
 IpPool filterInternal(const IpPool& pool, size_t index, T first)
 {
-    IpPool result;
-    if (pool.size() <= 0 || index >= pool.begin()->size())
-    {
-        return result;
-    }
-
     auto iterFilterFirst = std::find_if(pool.begin(), pool.end(), [&](const auto& ip)
     {
         return ip[index] == first;
@@ -85,6 +79,7 @@ IpPool filterInternal(const IpPool& pool, size_t index, T first)
         return ip[index] < first;
     });
 
+    IpPool result;
     std::copy(iterFilterFirst, iterFilterLast, std::back_inserter(result));
     return result;
 }
@@ -92,19 +87,19 @@ IpPool filterInternal(const IpPool& pool, size_t index, T first)
 template<class T, class... Types>
 IpPool filterInternal(const IpPool& pool, size_t index, T first, Types... args)
 {
-    IpPool result;
-    if (pool.size() <= 0)
-    {
-        return result;
-    }
-
-    result = filterInternal(pool, index, first);
+    auto result = filterInternal(pool, index, first);
     return filterInternal(result, index + 1, args...);
 }
 
 template<class... Types>
 IpPool filter(const IpPool& pool, Types... args)
 {
+    IpPool result;
+    if (pool.size() <= 0 || sizeof...(args) > pool.begin()->size())
+    {
+        return result;
+    }
+
     return filterInternal(pool, 0, args...);
 }
 
