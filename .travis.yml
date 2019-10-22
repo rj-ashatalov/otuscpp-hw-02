@@ -11,7 +11,7 @@ script:
 - cmake --build . --target test
 - cmake --build . --target package
 after_failure:
-  - ./test_version
+  - ./ip_filter
 deploy:
   provider: script
   skip_cleanup: true
