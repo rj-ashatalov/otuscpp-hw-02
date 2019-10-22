@@ -11,13 +11,7 @@ script:
 - cmake --build . --target test
 - cmake --build . --target package
 after_failure:
-    - curl -s -X POST \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/json" \
-            -H "Travis-API-Version: 3" \
-            -H "Authorization: token ${travis token}" \
-            -d "{\"quiet\": true}" \
-            https://api.travis-ci.org/job/${id}/debug
+  - make
 deploy:
   provider: script
   skip_cleanup: true
