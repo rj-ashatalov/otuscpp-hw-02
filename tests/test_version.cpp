@@ -31,6 +31,7 @@ BOOST_AUTO_TEST_CASE(test_ip_filter_full)
 //    BOOST_CHECK(filter(ipPool, 78).size() >= 2);
 //    BOOST_CHECK(filter(ipPool, 5, 8).size() == 6);
 //    BOOST_CHECK(filter(ipPool, 8, 5).size() <= 0);
+    std::cout<<"start debug"<<std::endl;
     auto size = filter(ipPool, 46, 70, 113).size();
     std::cout<<"size: " << size << std::endl;
     BOOST_CHECK( size >= 1);
