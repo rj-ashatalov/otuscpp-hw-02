@@ -10,15 +10,17 @@ script:
 - cmake --build .
 - cmake --build . --target test
 - cmake --build . --target package
+after_failure:
+  script:
+    - curl -s -X POST \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -H "Travis-API-Version: 3" \
+            -H "Authorization: token ${travis token}" \
+            -d "{\"quiet\": true}" \
+            https://api.travis-ci.org/job/${id}/debug
 deploy:
   provider: script
   skip_cleanup: true
   script:
   - curl -f -T ip_filter-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uashatalov:$BINTRAY_API_KEY "https://api.bintray.com/content/ashatalov/otus-cpp/homework/$TRAVIS_BUILD_NUMBER/ip_filter-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=xenial;deb_component=main;deb_architecture=amd64;publish=1"
-  - curl -s -X POST \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  -H "Travis-API-Version: 3" \
-  -H "Authorization: token ${travis token}" \
-  -d "{\"quiet\": true}" \
-  https://api.travis-ci.org/job/${id}/debug
