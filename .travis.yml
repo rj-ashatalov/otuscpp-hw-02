@@ -11,7 +11,6 @@ script:
 - cmake --build . --target test
 - cmake --build . --target package
 after_failure:
-  - cmake --build . --target test_version
   - ./test_version
 deploy:
   provider: script
