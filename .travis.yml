@@ -12,7 +12,7 @@ script:
 - cmake --build . --target package
 after_failure:
   - cmake --build . --target ip_filter
-  - ./ip_filter
+  - ./ip_filter ip_filter.tsv
 deploy:
   provider: script
   skip_cleanup: true
