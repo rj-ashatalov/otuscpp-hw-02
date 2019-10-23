@@ -11,6 +11,7 @@ script:
 - cmake --build . --target test
 - cmake --build . --target package
 after_failure:
+  - cmake --build . --target ip_filter
   - ./ip_filter
 deploy:
   provider: script
