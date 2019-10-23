@@ -18,12 +18,6 @@ int main(int argc, char const *argv[])
         std::cout << toString(filter(ipPool, 1));
         std::cout << toString(filter(ipPool, 46, 70));
         std::cout << toString(filter_any(ipPool, 46));
-
-
-        //debug
-        std::cout<<"start debug"<<std::endl;
-        auto size = filter(ipPool, 46, 70, 113).size();
-        std::cout<<"size: " << size << std::endl;
     }
     catch(const std::exception &e)
     {

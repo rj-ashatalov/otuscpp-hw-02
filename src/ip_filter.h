@@ -81,8 +81,6 @@ IpPool filterInternal(const IpPool& pool, size_t index, T first)
 
     IpPool result;
     std::copy(iterFilterFirst, iterFilterLast, std::back_inserter(result));
-
-    std::cout<<__PRETTY_FUNCTION__<< " size:" << result.size() << " index:" << index << " first:" << first << std::endl;
     return result;
 }
 
@@ -90,9 +88,7 @@ template<class T, class... Types>
 IpPool filterInternal(const IpPool& pool, size_t index, T first, Types... args)
 {
     auto result = filterInternal(pool, index, first);
-    result = filterInternal(result, index + 1, args...);
-    std::cout<<__PRETTY_FUNCTION__<< " size:" << result.size() << " index:" << index << " first:" << first << std::endl;
-    return result;
+    return filterInternal(result, index + 1, args...);
 }
 
 template<class... Types>
