@@ -69,18 +69,18 @@ std::string toString(const IpPool& pool)
 template<class T>
 IpPool filterInternal(const IpPool& pool, size_t index, T first)
 {
-    auto iterFilterFirst = std::find_if(pool.begin(), pool.end(), [&](const auto& ip)
+    auto iterFirst = std::lower_bound(pool.begin(), pool.end(), first, [&](const auto& ip, const auto& key)
     {
-        return ip[index] == first;
+        return ip[index] > key;
     });
 
-    auto iterFilterLast = std::find_if(iterFilterFirst, pool.end(), [&](const auto& ip)
+    auto iterLast = std::upper_bound(iterFirst, pool.end(), first, [&](const auto& key, const auto& ip)
     {
-        return ip[index] < first;
+        return key > ip[index];
     });
 
     IpPool result;
-    std::copy(iterFilterFirst, iterFilterLast, std::back_inserter(result));
+    std::copy(iterFirst, iterLast, std::back_inserter(result));
     return result;
 }
 
